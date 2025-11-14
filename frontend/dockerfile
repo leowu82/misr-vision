@@ -1,0 +1,18 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install dependencies
+RUN npm install http-proxy-middleware --save
+
+# Create React App
+RUN npx create-react-app frontend
+
+# Copy application code
+COPY ./frontend ./frontend
+
+# Expose the port your server runs on
+EXPOSE 8080
+
+# The command to start your production server
+CMD ["node", "src/index.js"]
