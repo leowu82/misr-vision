@@ -5,11 +5,8 @@ WORKDIR /app
 # Install dependencies
 RUN npm install http-proxy-middleware --save
 
-# Create React App
-RUN npx create-react-app frontend
-
 # Copy application code
-COPY ./frontend ./frontend
+COPY . .
 
 # Expose the port your server runs on
 EXPOSE 8080
