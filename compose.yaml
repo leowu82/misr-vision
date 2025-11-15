@@ -1,24 +1,4 @@
 services:
-  backend:
-    build: ./backend
-    container_name: backend
-    restart: always
-    env_file:  # Injects your .env file at runtime
-      - ./.env
-    networks:
-      - app-network
-
-  frontend:
-    build: ./frontend
-    container_name: frontend
-    restart: always
-    ports:
-      - "8080:8080"
-    networks:
-      - app-network
-    depends_on:
-      - backend
-
   cloud-sql-proxy:
     image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:latest
     container_name: cloud-sql-proxy
@@ -32,6 +12,28 @@ services:
     # If your VM has 'Cloud SQL Client' scope, this may work automatically.
     networks:
       - app-network
+
+  backend:
+    build: ./backend
+    container_name: backend
+    restart: always
+    env_file:  # Injects your .env file at runtime
+      - ./.env
+    networks:
+      - app-network
+    depends_on:
+      - cloud-sql-proxy
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    depends_on:
+      - backend
 
 networks:
   app-network:
