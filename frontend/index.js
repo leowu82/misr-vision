@@ -22,7 +22,7 @@ app.use(express.static(path.join(__dirname)));
 // Send all other requests to the React app
 // This allows React Router to handle page navigation
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname, '/public/index.html'));
 });
 
 app.listen(port, () => {

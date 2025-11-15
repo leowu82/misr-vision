@@ -15,7 +15,7 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy only the production dependencies (e.g., express, http-proxy-middleware)
+# Copy only the production dependencies
 COPY package*.json ./
 RUN npm install --omit=dev
 
