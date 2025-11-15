@@ -1,31 +1,22 @@
 # Use a lightweight Node image
 FROM node:18-alpine
 
-# Set working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Install prerequisites
-RUN apk add --no-cache curl bash
+# Copy package.json and package-lock.json
+# This is done first to leverage Docker's build cache
+COPY package*.json ./
 
-# Install dependencies
-# COPY package*.json ./
-RUN npm install express mysql2 @google-cloud/storage dotenv --save
+# Install ALL dependencies from package.json
+RUN npm install
 
-# Cloud SQL Auth Proxy setup
-ARG CLOUD_SQL_PROXY_VERSION=v2.0.0
-RUN curl -o /usr/local/bin/cloud-sql-proxy \
-    https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/${CLOUD_SQL_PROXY_VERSION}/cloud-sql-proxy.linux.amd64 \
-    && chmod +x /usr/local/bin/cloud-sql-proxy
-
-# Copy application code
+# Copy the rest of your application code
+# Add a .dockerignore in this folder to skip node_modules
 COPY . .
 
-# Expose the port the app runs on
+# Expose the port your app runs on
 EXPOSE 3000
 
-# Make entrypoint script executable
-RUN chmod +x /app/entrypoint.sh
-ENTRYPOINT ["/app/entrypoint.sh"]
-
-# Command to run the app
+# The command to start your app
 CMD ["node", "src/index.js"]
