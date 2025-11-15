@@ -9,7 +9,7 @@ a new one for every single request.
 We are still connecting to the Cloud SQL Auth Proxy on localhost.
 */
 const pool = mysql.createPool({
-  host: '127.0.0.1',
+  host: 'cloud-sql-proxy',
   port: 3306,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
