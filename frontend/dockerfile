@@ -18,8 +18,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --omit=dev
 
-# Copy server.js
-COPY server.js .
+# Copy the rest of your application code
+COPY . .
 
 # Copy the built React app from the 'builder' stage
 COPY --from=builder /app/build ./build
