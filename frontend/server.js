@@ -13,6 +13,9 @@ app.use(
   createProxyMiddleware({
     target: 'http://backend:3000', // Your backend API
     changeOrigin: true, // Recommended for virtual hosted sites
+    pathRewrite: {
+        '^/api': '', // Remove /api prefix when forwarding
+    },
   })
 );
 
