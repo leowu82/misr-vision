@@ -17,15 +17,15 @@ app.use(
 );
 
 // Serve the static React app
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname, 'build')));
 
 // Send all other requests to the React app
 // This allows React Router to handle page navigation
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '/public/index.html'));
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 app.listen(port, () => {
-  console.log(`Production server (with proxy) listening at http://backend:${port}`);
+  console.log(`Frontend server is running on http://localhost:${port}`);
   console.log("Access it from your browser using your VM's external IP on port 8080.");
 });
