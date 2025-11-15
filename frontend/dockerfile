@@ -1,5 +1,4 @@
 # --- Stage 1: Build the React App ---
-# We name this stage 'builder'
 FROM node:18-alpine AS builder
 
 WORKDIR /app
@@ -19,8 +18,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --omit=dev
 
-# Copy the rest of your application code
-COPY . .
+# Copy server.js
+COPY server.js .
 
 # Copy the built React app from the 'builder' stage
 COPY --from=builder /app/build ./build
@@ -29,4 +28,4 @@ COPY --from=builder /app/build ./build
 EXPOSE 8080
 
 # The command to start your production server
-CMD ["node", "src/index.js"]
+CMD ["node", "server.js"]
