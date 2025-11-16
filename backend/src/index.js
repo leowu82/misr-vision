@@ -24,7 +24,7 @@ const app = express();
 const port = 3000; // You can change this port if needed
 
 // --- API Endpoint ---
-// This defines a GET endpoint at the URL /api/orbits
+// This defines a GET endpoint at the URL /orbits
 app.get('/orbits', async (req, res) => {
   console.log('Received request for /orbits');
   try {
