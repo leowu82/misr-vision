@@ -16,8 +16,7 @@ function App() {
         // Define the async function to fetch data
         async function fetchData() {
             try {
-                // This is the URL of your Node.js API
-                // It's running on the same VM, but on port 3000
+                // Make the API call
                 const response = await fetch('/api/orbits');
                 
                 if (!response.ok) {
