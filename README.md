@@ -5,7 +5,6 @@
 ```
 /project
 ├── /backend
-│   ├── /node_modules
 │   ├── /src
 │   │   ├── /controllers
 │   │   ├── /models
@@ -16,15 +15,15 @@
 │   └── .dockerignore
 │
 ├── /frontend
-│   ├── /node_modules
-│   ├── /public
-│   │   └── index.html
+│   ├── /public           # Static assets (favicon, robots.txt)
 │   ├── /src
 │   │   ├── /components
 │   │   ├── /pages
-│   │   ├── App.js
-│   │   └── index.js
-│   ├── server.js
+│   │   ├── App.jsx       # Main Application Component
+│   │   └── index.jsx     # Entry point (mounts React to DOM)
+│   ├── nginx.conf        # Nginx config for Production serving & Proxying
+│   ├── vite.config.js    # Vite configuration (Port, Proxy, Plugins)
+│   ├── index.html        # Entry HTML file (Vite convention)
 │   ├── package.json
 │   ├── dockerfile
 │   └── .dockerignore
@@ -37,9 +36,9 @@
 
 ## Prerequisites
 
-- Docker & Docker Compose
-- Node.js (for local dev without Docker)
-- npm (for installing dependencies)
+- Docker Desktop (includes Docker Compose)
+- Node.js v18+ (Required if running locally without Docker)
+- npm or yarn
 
 ## Quick start (Docker Compose)
 
