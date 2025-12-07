@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 
+// Component to render an animated GIF cycling through cameras
 function CameraAnimation({ pixelsByCamera, cameras }) {
     const canvasRef = useRef(null);
     const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
-    const [direction, setDirection] = useState(1);
+    const [direction, setDirection] = useState(1); // 1 for forward, -1 for backward
     const [isPlaying, setIsPlaying] = useState(true);
-    const [fps, setFps] = useState(2);
+    const [fps, setFps] = useState(2); // frames per second
 
     useEffect(() => {
         if (!isPlaying || cameras.length === 0) return;
@@ -13,6 +14,8 @@ function CameraAnimation({ pixelsByCamera, cameras }) {
         const interval = setInterval(() => {
             setCurrentCameraIndex(prev => {
                 const next = prev + direction;
+                
+                // Check if we need to bounce back
                 if (next >= cameras.length - 1) {
                     setDirection(-1);
                     return cameras.length - 1;
@@ -20,6 +23,7 @@ function CameraAnimation({ pixelsByCamera, cameras }) {
                     setDirection(1);
                     return 0;
                 }
+                
                 return next;
             });
         }, 1000 / fps);
@@ -38,7 +42,7 @@ function CameraAnimation({ pixelsByCamera, cameras }) {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
 
-        // Calculate consistent bounds across all cameras
+        // Find the dimensions across all cameras for consistent sizing
         let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
         Object.values(pixelsByCamera).forEach(cameraPixels => {
             cameraPixels.forEach(p => {
@@ -51,22 +55,29 @@ function CameraAnimation({ pixelsByCamera, cameras }) {
 
         const width = maxX - minX + 1;
         const height = maxY - minY + 1;
+
+        // Set canvas size
         const scale = 2;
         canvas.width = height * scale;
         canvas.height = width * scale;
 
+        // Find min/max radiance for current camera
         const radiances = pixels.map(p => p.radiance).filter(r => r != null);
         const minRad = Math.min(...radiances);
         const maxRad = Math.max(...radiances);
         const rangeRad = maxRad - minRad || 1;
 
+        // Clear canvas
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+        // Draw pixels
         pixels.forEach(pixel => {
             if (pixel.radiance == null) return;
+
             const x = (pixel.index_y - minY) * scale;
             const y = (pixel.index_x - minX) * scale;
+
             const normalized = Math.floor(((pixel.radiance - minRad) / rangeRad) * 255);
             ctx.fillStyle = `rgb(${normalized}, ${normalized}, ${normalized})`;
             ctx.fillRect(x, y, scale, scale);
@@ -106,6 +117,7 @@ function CameraAnimation({ pixelsByCamera, cameras }) {
                     </select>
                 </div>
             </div>
+            <p className="text-sm text-gray-400">Frame {currentCameraIndex + 1} of {cameras.length}</p>
         </div>
     );
 }

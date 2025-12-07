@@ -2,6 +2,7 @@ import React from 'react';
 import CameraImage from './CameraImage';
 import CameraAnimation from './CameraAnimation';
 
+// Component to render multiple camera images
 function PixelMap({ pixels }) {
     // Group pixels by camera
     const pixelsByCamera = {};
@@ -26,9 +27,11 @@ function PixelMap({ pixels }) {
                     <p className="text-center text-gray-400">
                         Displaying {cameras.length} camera views
                     </p>
+                    {/* Camera Animation */}
                     <CameraAnimation pixelsByCamera={pixelsByCamera} cameras={cameras} />
                 </>
             )}
+            {/* Individual Camera Images */}
             <div className={`grid gap-6 ${cameras.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
                 {cameras.map(camera => (
                     <CameraImage 

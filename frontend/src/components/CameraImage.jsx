@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 
+// Component to render pixel data on a canvas for a single camera
 function CameraImage({ pixels, cameraName }) {
     const canvasRef = useRef(null);
     const [hoverInfo, setHoverInfo] = useState(null);
@@ -20,20 +21,23 @@ function CameraImage({ pixels, cameraName }) {
         const width = maxX - minX + 1;
         const height = maxY - minY + 1;
 
-        // Set canvas size with scaling factor
+        // Set canvas size with scaling factor for better visibility
+        // Flip width and height since we're swapping x and y axes
         const scale = 2;
         canvas.width = height * scale;
         canvas.height = width * scale;
 
+        // Store metadata for hover functionality
         setCanvasMetadata({ minX, maxX, minY, maxY, scale });
 
-        // Create lookup map
+        // Create a lookup map for quick pixel access
         const pixelMap = new Map();
         pixels.forEach(pixel => {
             const key = `${pixel.index_x},${pixel.index_y}`;
             pixelMap.set(key, pixel);
         });
 
+        // Find min/max radiance for normalization
         const radiances = pixels.map(p => p.radiance).filter(r => r != null);
         const minRad = Math.min(...radiances);
         const maxRad = Math.max(...radiances);
@@ -43,16 +47,23 @@ function CameraImage({ pixels, cameraName }) {
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Draw pixels
+        // Draw each pixel with flipped axes
         pixels.forEach(pixel => {
             if (pixel.radiance == null) return;
+
+            // Flip x and y: what was x becomes y, what was y becomes x
             const x = (pixel.index_y - minY) * scale;
             const y = (pixel.index_x - minX) * scale;
+
+            // Normalize radiance to 0-255 range
             const normalized = Math.floor(((pixel.radiance - minRad) / rangeRad) * 255);
+            
+            // Use grayscale for radiance
             ctx.fillStyle = `rgb(${normalized}, ${normalized}, ${normalized})`;
             ctx.fillRect(x, y, scale, scale);
         });
 
+        // Store pixel map for hover
         canvas.pixelMap = pixelMap;
     }, [pixels]);
 
@@ -66,9 +77,11 @@ function CameraImage({ pixels, cameraName }) {
 
         const { minX, minY, scale } = canvasMetadata;
 
+        // Convert canvas coordinates back to pixel indices (accounting for flipped axes)
         const index_y = Math.floor(x / scale) + minY;
         const index_x = Math.floor(y / scale) + minX;
 
+        // Look up the pixel data
         const key = `${index_x},${index_y}`;
         const pixel = canvas.pixelMap?.get(key);
 
@@ -110,10 +123,14 @@ function CameraImage({ pixels, cameraName }) {
                         <div className="text-right">{hoverInfo.index_y}</div>
                         <div className="text-gray-400">Radiance:</div>
                         <div className="text-right">{hoverInfo.radiance?.toFixed(4)}</div>
-                        <div className="text-gray-400">Lat:</div>
-                        <div className="text-right">{hoverInfo.latitude?.toFixed(4) || 'N/A'}</div>
-                        <div className="text-gray-400">Lon:</div>
-                        <div className="text-right">{hoverInfo.longitude?.toFixed(4) || 'N/A'}</div>
+                        <div className="text-gray-400">Latitude:</div>
+                        <div className="text-right">{hoverInfo.latitude != null ? hoverInfo.latitude?.toFixed(6) : 'N/A'}</div>
+                        <div className="text-gray-400">Longitude:</div>
+                        <div className="text-right">{hoverInfo.longitude != null ? hoverInfo.longitude?.toFixed(6) : 'N/A'}</div>
+                        <div className="text-gray-400">SOM X:</div>
+                        <div className="text-right">{hoverInfo.som_x != null ? hoverInfo.som_x?.toFixed(2) : 'N/A'}</div>
+                        <div className="text-gray-400">SOM Y:</div>
+                        <div className="text-right">{hoverInfo.som_y != null ? hoverInfo.som_y?.toFixed(2) : 'N/A'}</div>
                     </div>
                 ) : (
                     <div className="flex items-center justify-center h-full text-gray-400">
@@ -121,6 +138,7 @@ function CameraImage({ pixels, cameraName }) {
                     </div>
                 )}
             </div>
+            <p className="text-sm text-gray-400">{pixels.length} pixels</p>
         </div>
     );
 }
