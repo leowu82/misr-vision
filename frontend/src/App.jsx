@@ -203,6 +203,7 @@ function App() {
     const handleRectFormSubmit = async (e) => {
         e.preventDefault();
         try {
+            const token = localStorage.getItem('token');
             const url = editingRect ? `/api/rectangles/${editingRect}` : '/api/rectangles';
             const method = editingRect ? 'PUT' : 'POST';
             
@@ -210,6 +211,7 @@ function App() {
                 method: method,
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(rectForm)
             });
@@ -238,8 +240,12 @@ function App() {
         }
 
         try {
+            const token = localStorage.getItem('token');
             const response = await fetch(`/api/rectangles/${rect_id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
 
             if (!response.ok) {
@@ -746,7 +752,9 @@ function App() {
                                     <th className="px-5 py-3 border-b-2 border-gray-600 text-left text-xs font-semibold text-gray-300 uppercase">ULC Lon</th>
                                     <th className="px-5 py-3 border-b-2 border-gray-600 text-left text-xs font-semibold text-gray-300 uppercase">LRC Lat</th>
                                     <th className="px-5 py-3 border-b-2 border-gray-600 text-left text-xs font-semibold text-gray-300 uppercase">LRC Lon</th>
+                                    <th className="px-5 py-3 border-b-2 border-gray-600 text-left text-xs font-semibold text-gray-300 uppercase">Created By</th>
                                     <th className="px-5 py-3 border-b-2 border-gray-600 text-left text-xs font-semibold text-gray-300 uppercase">Date Created</th>
+                                    <th className="px-5 py-3 border-b-2 border-gray-600 text-left text-xs font-semibold text-gray-300 uppercase">Last Edited By</th>
                                     <th className="px-5 py-3 border-b-2 border-gray-600 text-left text-xs font-semibold text-gray-300 uppercase">Date Modified</th>
                                     <th className="px-5 py-3 border-b-2 border-gray-600 text-left text-xs font-semibold text-gray-300 uppercase">Actions</th>
                                 </tr>
@@ -761,7 +769,13 @@ function App() {
                                         <td className="px-5 py-4 border-b border-gray-700 text-sm text-gray-100">{rect.lrc_lat?.toFixed(4)}</td>
                                         <td className="px-5 py-4 border-b border-gray-700 text-sm text-gray-100">{rect.lrc_lon?.toFixed(4)}</td>
                                         <td className="px-5 py-4 border-b border-gray-700 text-sm text-gray-100">
+                                            {rect.creator_name || 'N/A'}
+                                        </td>
+                                        <td className="px-5 py-4 border-b border-gray-700 text-sm text-gray-100">
                                             {rect.date_created ? new Date(rect.date_created).toLocaleString() : 'N/A'}
+                                        </td>
+                                        <td className="px-5 py-4 border-b border-gray-700 text-sm text-gray-100">
+                                            {rect.editor_name || 'N/A'}
                                         </td>
                                         <td className="px-5 py-4 border-b border-gray-700 text-sm text-gray-100">
                                             {rect.date_modified ? new Date(rect.date_modified).toLocaleString() : 'N/A'}
