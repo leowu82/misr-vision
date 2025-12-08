@@ -12,51 +12,47 @@ exports.getPixels = async (req, res) => {
     } = req.query;
     
     try {
-        // Build the SQL query using SOM coordinate calculation
-        let query = `
-            SELECT index_x, index_y, som_x, som_y, latitude, longitude, camera_name, radiance
-            FROM (
-                SELECT orbit_id, path_id, block_id, camera_name, index_x, index_y,
-                index_x*275 + ulc_som_x + 0.5 AS som_x, 
-                index_y*275 + ulc_som_y + 0.5 AS som_y, 
-                radiance
-                FROM Block NATURAL JOIN Pixel NATURAL JOIN Orbit
-                WHERE 1=1
-        `;
+        // Prepare parameters for the stored procedure
+        // Convert to appropriate types or null
+        const p_block_id = block_id ? parseInt(block_id) : null;
+        const p_orbit_id = orbit_id ? parseInt(orbit_id) : null;
+        const p_camera_name = camera_name || null;
+        const p_index_x_min = min_index_x ? parseInt(min_index_x) : null;
+        const p_index_x_max = max_index_x ? parseInt(max_index_x) : null;
+        const p_index_y_min = min_index_y ? parseInt(min_index_y) : null;
+        const p_index_y_max = max_index_y ? parseInt(max_index_y) : null;
+        const p_lat_min = lrc_lat ? parseFloat(lrc_lat) : null;  // lower right corner has lower latitude
+        const p_lat_max = ulc_lat ? parseFloat(ulc_lat) : null;  // upper left corner has higher latitude
+        const p_lon_min = ulc_lon ? parseFloat(ulc_lon) : null;  // upper left corner has lower longitude
+        const p_lon_max = lrc_lon ? parseFloat(lrc_lon) : null;  // lower right corner has higher longitude
+        const p_lim = limit ? parseInt(limit) : 999999999;  // Default to large number if no limit
         
-        const params = [];
+        // Call the stored procedure
+        const [results] = await pool.query(
+            'CALL get_pixels(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [
+                p_block_id,
+                p_orbit_id,
+                p_camera_name,
+                p_index_x_min,
+                p_index_x_max,
+                p_index_y_min,
+                p_index_y_max,
+                p_lat_min,
+                p_lat_max,
+                p_lon_min,
+                p_lon_max,
+                p_lim
+            ]
+        );
         
-        // Add filters based on query parameters
-        if (block_id) { query += ' AND block_id = ?'; params.push(parseInt(block_id)); }
-        if (orbit_id) { query += ' AND orbit_id = ?'; params.push(parseInt(orbit_id)); }
-        if (camera_name) { query += ' AND camera_name = ?'; params.push(camera_name); }
-        
-        // Add index_x and index_y filters
-        if (min_index_x) { query += ' AND index_x >= ?'; params.push(parseInt(min_index_x)); }
-        if (max_index_x) { query += ' AND index_x <= ?'; params.push(parseInt(max_index_x)); }
-        if (min_index_y) { query += ' AND index_y >= ?'; params.push(parseInt(min_index_y)); }
-        if (max_index_y) { query += ' AND index_y <= ?'; params.push(parseInt(max_index_y)); }
-        
-        // Close the subquery and join with Geodetic
-        query += ` ) P NATURAL JOIN Geodetic G WHERE 1=1 `;
-        
-        // Add rectangle filtering based on lat/lon coordinates
-        // Upper left corner: higher latitude, lower longitude
-        // Lower right corner: lower latitude, higher longitude
-        if (ulc_lat) { query += ' AND G.latitude <= ?'; params.push(parseFloat(ulc_lat)); }
-        if (lrc_lat) { query += ' AND G.latitude >= ?'; params.push(parseFloat(lrc_lat)); }
-        if (ulc_lon) { query += ' AND G.longitude >= ?'; params.push(parseFloat(ulc_lon)); }
-        if (lrc_lon) { query += ' AND G.longitude <= ?'; params.push(parseFloat(lrc_lon)); }
-        
-        // Add limit only if provided
-        if (limit) { query += ' LIMIT ?'; params.push(parseInt(limit)); }
-        
-        const [results, fields] = await pool.query(query, params);
+        // The stored procedure returns results in results[0]
+        const pixels = results[0] || [];
         
         // Send the results back as a JSON response
         res.json({
-        count: results.length,
-        pixels: results
+            count: pixels.length,
+            pixels: pixels
         });
 
     } catch (error) {
